@@ -49,6 +49,16 @@
       filter: brightness(0.88);
       z-index: 0;
     }
+    @keyframes heroBgHandoff {
+      0% {
+        filter: brightness(0.72) saturate(0.92);
+        transform: scale(1.05);
+      }
+      100% {
+        filter: brightness(0.88) saturate(1);
+        transform: scale(1);
+      }
+    }
 
     .bg-overlay {
       position: absolute;
@@ -248,15 +258,42 @@
       z-index: 20000;
       background: var(--section-soft-bg);
       display: block;
-      transition: opacity 0.55s ease, visibility 0.55s ease;
       visibility: visible;
       opacity: 1;
       -webkit-tap-highlight-color: transparent;
     }
+    @keyframes entryBloomFadeOut {
+      0% {
+        opacity: 1;
+        filter: brightness(1) saturate(1);
+      }
+      24% {
+        opacity: 1;
+        filter: brightness(1.2) saturate(1.06);
+      }
+      100% {
+        opacity: 0;
+        filter: brightness(1.06) saturate(1);
+        visibility: hidden;
+      }
+    }
+    @keyframes entrySimpleFadeOut {
+      to {
+        opacity: 0;
+        visibility: hidden;
+      }
+    }
     .entry-overlay.entry-overlay--done {
-      opacity: 0;
-      visibility: hidden;
+      animation: entryBloomFadeOut 1.18s cubic-bezier(0.22, 1, 0.36, 1) forwards;
       pointer-events: none;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .entry-overlay.entry-overlay--done {
+        animation: entrySimpleFadeOut 0.4s ease forwards;
+      }
+      .page.hero-reveal .bg-video {
+        animation: none;
+      }
     }
     .entry-video {
       position: absolute;
@@ -421,6 +458,10 @@
       opacity: 1;
       visibility: visible;
       pointer-events: auto;
+    }
+
+    .page.hero-reveal .bg-video {
+      animation: heroBgHandoff 1.35s cubic-bezier(0.33, 1, 0.68, 1) forwards;
     }
 
     @keyframes heroFadeUp {
@@ -1193,26 +1234,6 @@
       position: relative;
       overflow: hidden;
     }
-
-    .dress-section .lang-toggle {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      border: 1.5px solid #bbb;
-      border-radius: 999px;
-      padding: 5px 14px;
-      font-family: 'Josefin Sans', sans-serif;
-      font-size: 12px;
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      color: #555;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      cursor: pointer;
-      background: transparent;
-    }
-    .dress-section .lang-toggle svg { width: 14px; height: 14px; stroke: #777; fill: none; }
 
     .dress-section .dress-float-icon {
       position: absolute;
@@ -2331,14 +2352,6 @@
 
 <section class="dress-section">
   <div class="section">
-    <button type="button" class="lang-toggle" onclick="toggleLang()" data-i18n-aria="dressLangAria" aria-label="Switch language">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-      </svg>
-      <span id="dressLangLabel">FR</span>
-    </button>
-
     <img class="dress-float-icon dress-float-1" src="assests/icon2.png" width="48" height="48" alt="" aria-hidden="true" decoding="async" />
     <img class="dress-float-icon dress-float-2" src="assests/icon2.png" width="48" height="48" alt="" aria-hidden="true" decoding="async" />
     <img class="dress-float-icon dress-float-3" src="assests/icon2.png" width="48" height="48" alt="" aria-hidden="true" decoding="async" />
@@ -2607,7 +2620,6 @@
       dressGenderMen: 'Men',
       dressStyleMen: 'Smart Casual<br>or Suits',
       dressImgAlt: 'Illustration — dress code',
-      dressLangAria: 'Switch language',
       rsvpEyebrow: 'Be Our Guest',
       rsvpTitle: 'RSVP',
       rsvpSubtitle: "Please let us know if you'll be joining us by<br>October 22, 2026",
@@ -2717,7 +2729,6 @@
       dressGenderMen: 'Hommes',
       dressStyleMen: 'Tenue chic décontractée<br>ou costume',
       dressImgAlt: 'Illustration — tenue',
-      dressLangAria: 'Changer de langue',
       rsvpEyebrow: 'Soyez des nôtres',
       rsvpTitle: 'RSVP',
       rsvpSubtitle: 'Merci de nous confirmer votre présence avant le<br>22 octobre 2026',
@@ -2850,8 +2861,6 @@
     });
 
     document.getElementById('langLabel').textContent = lang === 'en' ? 'FR' : 'EN';
-    const dressLL = document.getElementById('dressLangLabel');
-    if (dressLL) dressLL.textContent = lang === 'en' ? 'FR' : 'EN';
 
     refreshCompanionCardI18n();
     updateCompanionCounts();
@@ -2864,7 +2873,7 @@
 
   function toggleLang() {
     lang = lang === 'en' ? 'fr' : 'en';
-    ['eyebrow', 'dateLabel', 'confirmBtn', 'dressLangLabel'].forEach(id => {
+    ['eyebrow', 'dateLabel', 'confirmBtn'].forEach(id => {
       const el = document.getElementById(id);
       if (!el) return;
       el.classList.remove('flash');
@@ -2875,6 +2884,8 @@
   }
 
   const HERO_VIDEO_HOLD_MS = 1500;
+  /** Overlap hero copy with entry overlay fade-out for a soft crossfade. */
+  const HERO_REVEAL_AFTER_ENTRY_MS = 700;
   let heroRevealTimer = null;
 
   function beginHeroTextReveal() {
@@ -2884,9 +2895,10 @@
     page.classList.add('hero-reveal');
   }
 
-  function scheduleHeroRevealAfterEntry() {
+  function scheduleHeroRevealAfterEntry(fromEntryDismiss) {
     if (heroRevealTimer) clearTimeout(heroRevealTimer);
-    heroRevealTimer = setTimeout(beginHeroTextReveal, HERO_VIDEO_HOLD_MS);
+    const delay = fromEntryDismiss ? HERO_REVEAL_AFTER_ENTRY_MS : HERO_VIDEO_HOLD_MS;
+    heroRevealTimer = setTimeout(beginHeroTextReveal, delay);
   }
 
   function initPetalRain() {
@@ -2941,7 +2953,7 @@
     const tapBtn = document.getElementById('entryTapPlay');
     const skipBtn = document.getElementById('entrySkip');
     if (!overlay || !entryVideo || !skipBtn) {
-      scheduleHeroRevealAfterEntry();
+      scheduleHeroRevealAfterEntry(false);
       return;
     }
 
@@ -2971,7 +2983,7 @@
       overlay.classList.add('entry-overlay--done');
       document.body.style.overflow = '';
       overlay.setAttribute('aria-hidden', 'true');
-      scheduleHeroRevealAfterEntry();
+      scheduleHeroRevealAfterEntry(true);
     }
 
     function startEntryPlayback() {
