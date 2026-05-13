@@ -1,36 +1,47 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Alex & Diane · 22 November 2026
 
-## Getting Started
+A digital wedding invitation delivered with **Next.js**—because love deserves a fast first paint.
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+     ♥
+   Save the date
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## What this is
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+The heart of the site lives in **`public/page1.html`**: one handcrafted page with its own typography, motion, and bilingual touches. Next.js wraps it lightly—visit the root URL and you’re whisked straight to the invitation, no compromise on design.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Quick start
 
-## Learn More
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000)—you’ll land on the invitation (`/page1.html`).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Production:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run build
+npm start
+```
 
-## Deploy on Vercel
+## Inside the box
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Path | Role |
+|------|------|
+| `public/page1.html` | The invitation—layout, styles, and interactions |
+| `public/assests/` | **Background video**, **entry animation**, and **icons** (paths in HTML match this folder name) |
+| `app/page.tsx` | Redirects `/` → `/page1.html` |
+| `app/layout.tsx` | Site metadata (title & description) |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> **Tip:** To refresh copy, colors, or sections, edit `public/page1.html` directly. Replace media in `public/assests/` and keep filenames aligned with the `<video>` / `<img>` / `<source>` tags.
+
+## Deploying
+
+Works anywhere Next.js runs ([Vercel](https://vercel.com), [Netlify](https://netlify.com), your own Node host). Large video files count toward static asset limits—compress clips if your host has caps.
+
+---
+
+*Made with care. RSVP in the page.*
