@@ -1,47 +1,67 @@
-# Alex & Diane · 22 November 2026
+# Alex & Diane — 22 November 2026
 
-A digital wedding invitation delivered with **Next.js**—because love deserves a fast first paint.
+> *One scroll. Two languages. A thousand tiny details.*
 
-```
-     ♥
-   Save the date
-```
+This repo is a **digital wedding invitation** that feels like a single, cinematic page—hero video, falling petals, entry animation, RSVP, travel tips, and a soundtrack—while still shipping as a **modern Next.js** app so you get clean deploys and a proper favicon.
 
-## What this is
+---
 
-The heart of the site lives in **`public/page1.html`**: one handcrafted page with its own typography, motion, and bilingual touches. Next.js wraps it lightly—visit the root URL and you’re whisked straight to the invitation, no compromise on design.
+## The idea in one breath
 
-## Quick start
+Almost everything guests see lives in **`public/page1.html`**: HTML, CSS, and vanilla JavaScript woven together on purpose. Next.js does not reinterpret your layout; it **hosts** the page and sends browsers straight to the experience.
+
+Think of it as a **hand-bound invitation inside a shipping box**—the box is Next; the invitation is the HTML file.
+
+---
+
+## Run it locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)—you’ll land on the invitation (`/page1.html`).
+Open **[http://localhost:3000](http://localhost:3000)**. You’ll be redirected to **`/page1.html`**—that’s the invitation.
 
-Production:
+Ship build:
 
 ```bash
 npm run build
 npm start
 ```
 
-## Inside the box
+---
 
-| Path | Role |
-|------|------|
-| `public/page1.html` | The invitation—layout, styles, and interactions |
-| `public/assests/` | **Background video**, **entry animation**, and **icons** (paths in HTML match this folder name) |
-| `app/page.tsx` | Redirects `/` → `/page1.html` |
-| `app/layout.tsx` | Site metadata (title & description) |
+## Where things live
 
-> **Tip:** To refresh copy, colors, or sections, edit `public/page1.html` directly. Replace media in `public/assests/` and keep filenames aligned with the `<video>` / `<img>` / `<source>` tags.
+| Piece | What it does |
+|--------|----------------|
+| **`public/page1.html`** | The full invitation: sections, themes, i18n (EN/FR), motion, forms, audio |
+| **`public/assests/`** | Media bundle: hero video, entry clip + **cover image**, icons, day-program background, etc. *(Yes, the folder name is `assests`—paths in the HTML match it on purpose.)* |
+| **`public/favicon.svg`** | Purple star tab icon |
+| **`app/page.tsx`** | Sends `/` → `/page1.html` |
+| **`app/layout.tsx`** | Title, description, and favicon metadata for the app shell |
 
-## Deploying
-
-Works anywhere Next.js runs ([Vercel](https://vercel.com), [Netlify](https://netlify.com), your own Node host). Large video files count toward static asset limits—compress clips if your host has caps.
+**Design changes:** edit `page1.html` and refresh. **New photos or clips:** drop files into `public/assests/` (or elsewhere under `public/`) and update the matching `src` / `<source>` attributes.
 
 ---
 
-*Made with care. RSVP in the page.*
+## Stack (honest version)
+
+- **Next.js** — routing, production server, metadata.
+- **No React rewrite of the invitation** — the invite is intentionally a self-contained document.
+- **Tailwind / Geist** — still wired through the app shell for anything you add under `app/` later; the invite does not depend on them.
+
+---
+
+## Deploy notes
+
+Works on any host that runs Node for Next ([Vercel](https://vercel.com), [Netlify](https://www.netlify.com/), your own VPS). **Videos are heavy**; check your platform’s asset size limits and consider compressing long clips before you upload.
+
+---
+
+## Small credits line
+
+Built as a love letter to the details—fonts, timing, bilingual copy, and the moment someone taps the entry cover to begin.
+
+**22 November 2026** · Alex & Diane

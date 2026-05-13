@@ -266,6 +266,7 @@
       object-fit: cover;
       object-position: center center;
       background: #000;
+      z-index: 0;
     }
     @media (min-width: 769px) {
       .entry-video {
@@ -276,7 +277,7 @@
     .entry-cover {
       position: absolute;
       inset: 0;
-      z-index: 1;
+      z-index: 2;
       border: none;
       padding: 0;
       margin: 0;
@@ -287,6 +288,7 @@
       background: #0a0608;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
+      pointer-events: auto;
     }
     .entry-cover img {
       width: 100%;
@@ -2947,6 +2949,8 @@
     entryVideo.currentTime = 0;
 
     let dismissed = false;
+    let entryPlaybackAbort = null;
+    let entryFallbackTimer = null;
 
     function hideEntryCover() {
       if (entryCover) entryCover.hidden = true;
@@ -2956,6 +2960,12 @@
     function dismissEntry() {
       if (dismissed) return;
       dismissed = true;
+      entryPlaybackAbort?.abort();
+      entryPlaybackAbort = null;
+      if (entryFallbackTimer) {
+        clearTimeout(entryFallbackTimer);
+        entryFallbackTimer = null;
+      }
       entryVideo.pause();
       hideEntryCover();
       overlay.classList.add('entry-overlay--done');
@@ -2966,29 +2976,59 @@
 
     function startEntryPlayback() {
       if (dismissed) return;
-      if (entryVideo.error) {
-        dismissEntry();
-        return;
+
+      entryPlaybackAbort?.abort();
+      if (entryFallbackTimer) {
+        clearTimeout(entryFallbackTimer);
+        entryFallbackTimer = null;
       }
+      entryPlaybackAbort = new AbortController();
+      const signal = entryPlaybackAbort.signal;
+
+      const failOpenTap = () => {
+        if (entryFallbackTimer) {
+          clearTimeout(entryFallbackTimer);
+          entryFallbackTimer = null;
+        }
+        entryPlaybackAbort?.abort();
+        entryPlaybackAbort = null;
+        if (entryCover) entryCover.hidden = true;
+        if (tapBtn) {
+          tapBtn.hidden = false;
+          tapBtn.style.zIndex = '4';
+        }
+      };
+
+      const onPlaying = () => {
+        if (entryFallbackTimer) {
+          clearTimeout(entryFallbackTimer);
+          entryFallbackTimer = null;
+        }
+        entryPlaybackAbort = null;
+        hideEntryCover();
+      };
+      entryVideo.addEventListener('playing', onPlaying, { once: true, signal });
+
+      entryFallbackTimer = setTimeout(() => {
+        entryFallbackTimer = null;
+        if (!entryVideo.paused) {
+          hideEntryCover();
+        } else {
+          failOpenTap();
+        }
+      }, 1200);
+
       entryVideo.muted = false;
-      const playPromise = entryVideo.play();
       if (pageMusic && soundBtn && !soundBtn.classList.contains('muted')) {
         pageMusic.play().catch(() => {});
       }
-      Promise.resolve(playPromise)
-        .then(() => { hideEntryCover(); })
+
+      Promise.resolve(entryVideo.play())
         .catch(() => {
           entryVideo.muted = true;
           return entryVideo.play();
         })
-        .then(() => { hideEntryCover(); })
-        .catch(() => {
-          if (entryCover) entryCover.hidden = true;
-          if (tapBtn) {
-            tapBtn.hidden = false;
-            tapBtn.style.zIndex = '3';
-          }
-        });
+        .catch(failOpenTap);
     }
 
     entryVideo.addEventListener('ended', dismissEntry);
